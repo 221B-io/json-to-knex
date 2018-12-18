@@ -1,4 +1,4 @@
-const builder = require('lib/builder');
+const builder = require('./lib/builder');
 
 module.exports = {
   createTable: builder.createTable,
