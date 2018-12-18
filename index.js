@@ -1,7 +1,7 @@
 const builder = require('lib/builder');
 
 module.exports = {
-  builder.createTable,
-  builder.createTables,
-  builder.dropTablesIfExists,
+  createTable: builder.createTable,
+  createTables: builder.createTables,
+  dropTablesIfExists: builder.dropTablesIfExists,
 };
