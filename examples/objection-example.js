@@ -64,19 +64,17 @@ const schema = {
   },
 };
 
-function createClient (Knex) {
-  return Knex({
-    client: 'sqlite3',
-    connection: { 
-      filename: './dev.sqlite3',
-    },
-    useNullAsDefault: true,
-    debug: true,
-  });
-}
+const knexConfig = {
+  client: 'sqlite3',
+  connection: { 
+    filename: './dev.sqlite3',
+  },
+  useNullAsDefault: true,
+  debug: true,
+};
 
 async function go() {
-  let knex = createClient(Knex);
+  let knex = Knex(knexConfig);
   await builder.dropTablesIfExists(knex, schema);
   await builder.createTables(knex, schema);
   knex.destroy();
