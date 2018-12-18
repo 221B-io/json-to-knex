@@ -1,0 +1,5 @@
+.DS_Store
+node_modules
+scratch
+lerna-debug.log
+*sqlite3
