@@ -1,4 +1,4 @@
-const builder = require('../lib/builder');
+const builder = require('../index');
 
 const Knex = require('knex');
 
