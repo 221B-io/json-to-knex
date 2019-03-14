@@ -3,65 +3,107 @@ const builder = require('../index');
 const Knex = require('knex');
 
 const schema = {
-  persons: {
-    id: {
-      type: 'increments',
-      primary: true,
+  tables: [
+    {
+      name: 'persons',
+      columns: [
+        {
+          name: 'id',
+          type: 'increments',
+          primary: true,
+        },
+        {
+          name: 'parentId',
+          type: 'integer',
+          unsigned: true,
+          references: 'id',
+          inTable: 'persons',
+          onDelete: 'SET NULL',
+        },
+        {
+          name: 'firstName',
+          type: 'string',
+        },
+        {
+          name: 'lastName',
+          type: 'string',
+        },
+        {
+          name: 'age',
+          type: 'integer',
+        },
+        {
+          name: 'address',
+          type: 'json',
+        }
+      ],
     },
-    parentId: {
-      type: 'integer',
-      unsigned: true,
-      references: 'id',
-      inTable: 'persons',
-      onDelete: 'SET NULL',
+    {
+      name: 'movies',
+      columns: [
+        {
+          name: 'id',
+          type: 'increments',
+          primary: true,
+        },
+        {
+          name: 'name',
+          type: 'string',
+        }
+      ],
     },
-    firstName: 'string',
-    lastName: 'string',
-    age: 'integer',
-    address: 'json',
-  },
-  movies: {
-    id: {
-      type: 'increments',
-      primary: true,
+    {
+      name: 'animals',
+      columns: [
+        {
+          name: 'id',
+          type: 'increments',
+          primary: true,
+        },
+        {
+          name: 'ownerId',
+          type: 'integer',
+          unsigned: true,
+          references: 'id',
+          inTable: 'persons',
+          onDelete: 'SET NULL',
+        },
+        {
+          name: 'name',
+          type: 'string',
+        },
+        {
+          name: 'species',
+          type: 'string',
+        }
+      ]
     },
-    name: 'string',
-  },
-  animals: {
-    id: {
-      type: 'increments',
-      primary: true,
+    {
+      name: 'persons_movies',
+      columns: [
+        {
+          name: 'id',
+          primary: true,
+        },
+        {
+          name: 'personId',
+          type: 'integer',
+          unsigned: true,
+          references: 'id',
+          inTable: 'persons',
+          onDelete: 'CASCADE',
+        },
+        {
+          name: 'movieId',
+          type: 'integer',
+          unsigned: true,
+          references: 'id',
+          inTable: 'movies',
+          onDelete: 'CASCADE',
+        },
+      ],
     },
-    ownerId: {
-      type: 'integer',
-      unsigned: true,
-      references: 'id',
-      inTable: 'persons',
-      onDelete: 'SET NULL',
-    },
-    name: 'string',
-    species: 'string',
-  },
-  persons_movies: {
-    id: {
-      type: 'increments',
-      primary: true,
-    },
-    personId: {
-      type: 'integer',
-      unsigned: true,
-      references: 'id',
-      inTable: 'persons',
-      onDelete: 'CASCADE',
-    },
-    movieId: {
-      type: 'integer',
-      unsigned: true,
-      references: 'id',
-      inTable: 'movies',
-      onDelete: 'CASCADE',
-    },
-  },
+  ],
 };
 
 const knexConfig = {

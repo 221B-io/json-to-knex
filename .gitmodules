@@ -1,0 +1,3 @@
+[submodule "sql-json-schema"]
+	path = sql-json-schema
+	url = https://github.com/221B-io/sql-json-schema.git
