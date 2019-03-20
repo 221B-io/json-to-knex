@@ -73,18 +73,21 @@ const knexConfig = {
   debug: true
 };
 
-async function go() {
-  let knex = Knex(knexConfig);
-  await builder.dropTablesIfExists(knex, schema);
-  await builder.createTables(knex, schema);
+let knex;
+beforeAll(() => {
+  knex = Knex(knexConfig);
+});
+afterAll(() => {
   knex.destroy();
-}
-
-go();
+});
+beforeEach(async () => {
+  await builder.dropTablesIfExists(knex, schema);
+});
+afterEach(async () => {
+  await builder.dropTablesIfExists(knex, schema);
+});
 
 test("successfully drops all tables", async () => {
-  let knex = Knex(knexConfig);
-  await builder.dropTablesIfExists(knex, schema);
   await builder.createTables(knex, schema);
   await builder.dropTablesIfExists(knex, schema);
   const empty = JSON.stringify({});
@@ -98,8 +101,6 @@ test("successfully drops all tables", async () => {
 });
 
 test("successfully adds columns", async () => {
-  // stub
-  let knex = Knex(knexConfig);
   let persons = {
     id: {
       type: "integer",
@@ -138,7 +139,6 @@ test("successfully adds columns", async () => {
       defaultValue: null
     }
   };
-  await builder.dropTablesIfExists(knex, schema);
   await builder.createTables(knex, schema);
   let personCols = await knex("persons").columnInfo();
   let movieCols = await knex("movies").columnInfo();
@@ -210,5 +210,4 @@ test("successfully adds columns", async () => {
   expect(JSON.stringify(personMovieCols)).toEqual(
     JSON.stringify(personsMovies)
   );
-  await builder.dropTablesIfExists(knex, schema);
 });
