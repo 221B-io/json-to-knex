@@ -3,65 +3,107 @@ const _ = require("lodash");
 const Knex = require("knex");
 
 const schema = {
-  persons: {
-    id: {
-      type: "increments",
-      primary: true
+  tables: [
+    {
+      name: "persons",
+      columns: [
+        {
+          name: "id",
+          type: "increments",
+          primary: true
+        },
+        {
+          name: "parentId",
+          type: "integer",
+          unsigned: true,
+          references: "id",
+          inTable: "persons",
+          onDelete: "SET NULL"
+        },
+        {
+          name: "firstName",
+          type: "string"
+        },
+        {
+          name: "lastName",
+          type: "string"
+        },
+        {
+          name: "age",
+          type: "integer"
+        },
+        {
+          name: "address",
+          type: "json"
+        }
+      ]
     },
-    parentId: {
-      type: "integer",
-      unsigned: true,
-      references: "id",
-      inTable: "persons",
-      onDelete: "SET NULL"
+    {
+      name: "movies",
+      columns: [
+        {
+          name: "id",
+          type: "increments",
+          primary: true
+        },
+        {
+          name: "name",
+          type: "string"
+        }
+      ]
     },
-    firstName: "string",
-    lastName: "string",
-    age: "integer",
-    address: "json"
-  },
-  movies: {
-    id: {
-      type: "increments",
-      primary: true
+    {
+      name: "animals",
+      columns: [
+        {
+          name: "id",
+          type: "increments",
+          primary: true
+        },
+        {
+          name: "ownerId",
+          type: "integer",
+          unsigned: true,
+          references: "id",
+          inTable: "persons",
+          onDelete: "SET NULL"
+        },
+        {
+          name: "name",
+          type: "string"
+        },
+        {
+          name: "species",
+          type: "string"
+        }
+      ]
     },
-    name: "string"
-  },
-  animals: {
-    id: {
-      type: "increments",
-      primary: true
-    },
-    ownerId: {
-      type: "integer",
-      unsigned: true,
-      references: "id",
-      inTable: "persons",
-      onDelete: "SET NULL"
-    },
-    name: "string",
-    species: "string"
-  },
-  persons_movies: {
-    id: {
-      type: "increments",
-      primary: true
-    },
-    personId: {
-      type: "integer",
-      unsigned: true,
-      references: "id",
-      inTable: "persons",
-      onDelete: "CASCADE"
-    },
-    movieId: {
-      type: "integer",
-      unsigned: true,
-      references: "id",
-      inTable: "movies",
-      onDelete: "CASCADE"
+    {
+      name: "persons_movies",
+      columns: [
+        {
+          name: "id",
+          primary: true
+        },
+        {
+          name: "personId",
+          type: "integer",
+          unsigned: true,
+          references: "id",
+          inTable: "persons",
+          onDelete: "CASCADE"
+        },
+        {
+          name: "movieId",
+          type: "integer",
+          unsigned: true,
+          references: "id",
+          inTable: "movies",
+          onDelete: "CASCADE"
+        }
+      ]
     }
-  }
+  ]
 };
 
 const knexConfig = {
@@ -73,21 +115,28 @@ const knexConfig = {
   debug: true
 };
 
-async function go() {
-  let knex = Knex(knexConfig);
-  await builder.dropTablesIfExists(knex, schema);
-  await builder.createTables(knex, schema);
-  knex.destroy();
-}
+let knex;
+beforeAll(async () => {
+  knex = Knex(knexConfig);
+});
 
-go();
+afterAll(async () => {
+  knex.destroy();
+});
+
+beforeEach(async () => {
+  await builder.dropTablesIfExists(knex, schema);
+});
+
+afterEach(async () => {
+  await builder.dropTablesIfExists(knex, schema);
+});
 
 test("successfully drops all tables", async () => {
-  let knex = Knex(knexConfig);
-  await builder.dropTablesIfExists(knex, schema);
-  await builder.createTables(knex, schema);
-  await builder.dropTablesIfExists(knex, schema);
   const empty = JSON.stringify({});
+  await builder.createTables(knex, schema);
+  expect(JSON.stringify(await knex("persons").columnInfo())).not.toEqual(empty);
+  await builder.dropTablesIfExists(knex, schema);
 
   expect(JSON.stringify(await knex("persons").columnInfo())).toEqual(empty);
   expect(JSON.stringify(await knex("movies").columnInfo())).toEqual(empty);
@@ -98,8 +147,12 @@ test("successfully drops all tables", async () => {
 });
 
 test("successfully adds columns", async () => {
-  // stub
   let knex = Knex(knexConfig);
+  await builder.createTables(knex, schema);
+  let personCols = await knex("persons").columnInfo();
+  let movieCols = await knex("movies").columnInfo();
+  let animalCols = await knex("animals").columnInfo();
+  let personMovieCols = await knex("persons_movies").columnInfo();
   let persons = {
     id: {
       type: "integer",
@@ -138,12 +191,6 @@ test("successfully adds columns", async () => {
       defaultValue: null
     }
   };
-  await builder.dropTablesIfExists(knex, schema);
-  await builder.createTables(knex, schema);
-  let personCols = await knex("persons").columnInfo();
-  let movieCols = await knex("movies").columnInfo();
-  let animalCols = await knex("animals").columnInfo();
-  let personMovieCols = await knex("persons_movies").columnInfo();
   let movies = {
     id: {
       type: "integer",
@@ -185,12 +232,6 @@ test("successfully adds columns", async () => {
     }
   };
   let personsMovies = {
-    id: {
-      type: "integer",
-      maxLength: null,
-      nullable: false,
-      defaultValue: null
-    },
     personId: {
       type: "integer",
       maxLength: null,
@@ -210,5 +251,4 @@ test("successfully adds columns", async () => {
   expect(JSON.stringify(personMovieCols)).toEqual(
     JSON.stringify(personsMovies)
   );
-  await builder.dropTablesIfExists(knex, schema);
 });
