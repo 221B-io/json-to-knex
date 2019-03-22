@@ -2,7 +2,45 @@
 
 ## What it does
 
-JSON to Knex dynamically creates tables by
+JSON to Knex dynamically creates tables by parsing a JSON structure into a series of chained knexjs functions using the input you specify.
+
+## Examples
+
+```js
+const schema = {
+  tables: [
+    {
+      name: "todo",
+      columns: [
+        {
+          name: "userId",
+          type: "integer",
+          unsigned: true,
+          references: "id",
+          inTable: "users",
+          onDelete: "SET NULL" // or cascade
+        },
+        {
+          name: "description",
+          type: "string"
+        },
+        {
+          name: "isDone",
+          type: "boolean"
+        }
+      ]
+    }
+  ]
+};
+```
+
+will produce
+
+```js
+// todo: add transpiled knex here
+```
+
+For more examples, see `./examples`.
 
 ## Tests
 
