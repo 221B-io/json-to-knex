@@ -162,17 +162,28 @@ test("create a single table", async () => {
   expect(userCols).toEqual(userColsExpected);
 });
 
-test("create a single table with non-null defaults", async () => {
+test("create a single table with defaults", async () => {
   const defaultUserSchema = { ...userSchema };
   defaultUserSchema.columns[0].default = "default test";
   const defaultUserColsExpected = { ...userColsExpected };
   defaultUserColsExpected.test.defaultValue = "'default test'";
   await builder.createTable(knex.schema, "users", defaultUserSchema);
   let defaultUserCols = await knex("users").columnInfo();
+  console.log(defaultUserCols);
   expect(defaultUserCols).toEqual(defaultUserColsExpected);
 });
 
-test("drops all tables", async () => {
+test("create a single table with non-nullable fields", async () => {
+  const nullableUserSchema = { ...userSchema };
+  nullableUserSchema.columns[0].nullable = false;
+  const nullableUserColsExpected = { ...userColsExpected };
+  nullableUserColsExpected.test.nullable = false;
+  await builder.createTable(knex.schema, "users", nullableUserSchema);
+  let nullableUserCols = await knex("users").columnInfo();
+  expect(nullableUserCols).toEqual(nullableUserColsExpected);
+});
+
+test("drop all tables", async () => {
   const empty = JSON.stringify({});
   await builder.createTables(knex, schema);
   expect(JSON.stringify(await knex("persons").columnInfo())).not.toEqual(empty);
