@@ -113,7 +113,12 @@ const indexSchema = {
       type: "string",
       index: true
     },
-    { name: "author", type: "string" }
+    { name: "author", type: "string" },
+    {
+      name: "idx",
+      type: "index",
+      columns: ["author", "title"]
+    }
   ]
 };
 
@@ -167,12 +172,13 @@ const userColsExpected = {
   }
 };
 
-test("create table with index", async () => {
+test("create table with single- and multi-column indexes", async () => {
   await builder.createTable(knex.schema, "books", indexSchema);
   let bookCols = await knex("books").columnInfo();
   console.log(bookCols);
   // get a list of all indices created
   let results = await knex("sqlite_master").where("type", "index");
+  console.log(results);
   let expected = [
     {
       type: "index",
@@ -180,6 +186,13 @@ test("create table with index", async () => {
       tbl_name: "books",
       rootpage: 3,
       sql: "CREATE INDEX `books_title_index` on `books` (`title`)"
+    },
+    {
+      type: "index",
+      name: "idx",
+      tbl_name: "books",
+      rootpage: 4,
+      sql: "CREATE INDEX `idx` on `books` (`author`, `title`)"
     }
   ];
   expect(JSON.stringify(results)).toEqual(JSON.stringify(expected));
