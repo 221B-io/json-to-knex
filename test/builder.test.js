@@ -166,7 +166,7 @@ test("create a single table with non-null defaults", async () => {
   const defaultUserSchema = { ...userSchema };
   defaultUserSchema.columns[0].default = "default test";
   const defaultUserColsExpected = { ...userColsExpected };
-  defaultUserColsExpected.defaultValue = "default test";
+  defaultUserColsExpected.test.defaultValue = "'default test'";
   await builder.createTable(knex.schema, "users", defaultUserSchema);
   let defaultUserCols = await knex("users").columnInfo();
   expect(defaultUserCols).toEqual(defaultUserColsExpected);
