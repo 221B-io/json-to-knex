@@ -106,6 +106,17 @@ const schema = {
   ]
 };
 
+const indexSchema = {
+  columns: [
+    {
+      name: "title",
+      type: "string",
+      index: true
+    },
+    { name: "author", type: "string" }
+  ]
+};
+
 const knexConfig = {
   client: "sqlite3",
   connection: {
@@ -155,6 +166,24 @@ const userColsExpected = {
     defaultValue: null
   }
 };
+
+test("create table with index", async () => {
+  await builder.createTable(knex.schema, "books", indexSchema);
+  let bookCols = await knex("books").columnInfo();
+  console.log(bookCols);
+  // get a list of all indices created
+  let results = await knex("sqlite_master").where("type", "index");
+  let expected = [
+    {
+      type: "index",
+      name: "books_title_index",
+      tbl_name: "books",
+      rootpage: 3,
+      sql: "CREATE INDEX `books_title_index` on `books` (`title`)"
+    }
+  ];
+  expect(JSON.stringify(results)).toEqual(JSON.stringify(expected));
+});
 
 test("create a single table", async () => {
   await builder.createTable(knex.schema, "users", userSchema);
