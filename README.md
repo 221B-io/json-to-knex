@@ -76,7 +76,7 @@ A schema is always represented as:
 
 Column objects have a variety of options that can be specified:
 | key | type | default | description |
-|-|-|-|-|
+| --- | --- | --- | --- |
 | Required | | | |
 | name | string | null | Required. Column name in table. Should be camelCased (e.g. "email" or "emailAddress")
 | type | enum | null | Required. Data type of column (possible values: "binary", "string", "text", "dateTime", "time", "date", "increments", "integer", "json", "index")
