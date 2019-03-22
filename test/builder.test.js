@@ -135,9 +135,44 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await builder.dropTablesIfExists(knex, schema);
+  await knex.schema.dropTableIfExists("users");
 });
 
-test("successfully drops all tables", async () => {
+const userSchema = {
+  columns: [
+    {
+      name: "test",
+      type: "string"
+    }
+  ]
+};
+
+const userColsExpected = {
+  test: {
+    type: "varchar",
+    maxLength: "255",
+    nullable: true,
+    defaultValue: null
+  }
+};
+
+test("create a single table", async () => {
+  await builder.createTable(knex.schema, "users", userSchema);
+  let userCols = await knex("users").columnInfo();
+  expect(userCols).toEqual(userColsExpected);
+});
+
+test("create a single table with non-null defaults", async () => {
+  const defaultUserSchema = { ...userSchema };
+  defaultUserSchema.columns[0].default = "default test";
+  const defaultUserColsExpected = { ...userColsExpected };
+  defaultUserColsExpected.defaultValue = "default test";
+  await builder.createTable(knex.schema, "users", defaultUserSchema);
+  let defaultUserCols = await knex("users").columnInfo();
+  expect(defaultUserCols).toEqual(defaultUserColsExpected);
+});
+
+test("drops all tables", async () => {
   const empty = JSON.stringify({});
   await builder.createTables(knex, schema);
   expect(JSON.stringify(await knex("persons").columnInfo())).not.toEqual(empty);
@@ -151,8 +186,7 @@ test("successfully drops all tables", async () => {
   );
 });
 
-test("successfully adds columns to multiple tables", async () => {
-  let knex = Knex(knexConfig);
+test("adds columns to multiple tables", async () => {
   await builder.createTables(knex, schema);
   let personCols = await knex("persons").columnInfo();
   let movieCols = await knex("movies").columnInfo();
