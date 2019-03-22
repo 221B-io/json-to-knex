@@ -18,15 +18,18 @@ const schema = {
           unsigned: true,
           references: "id",
           inTable: "users",
-          onDelete: "SET NULL" // or cascade
+          onDelete: "SET NULL" // or e.g. "CASCADE"
+          // all fields are null by default unless overridden
         },
         {
           name: "description",
-          type: "string"
+          type: "string",
+          default: ""
         },
         {
           name: "isDone",
-          type: "boolean"
+          type: "boolean",
+          default: false
         }
       ]
     }
