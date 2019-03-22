@@ -151,7 +151,7 @@ test("successfully drops all tables", async () => {
   );
 });
 
-test("successfully adds columns", async () => {
+test("successfully adds columns to multiple tables", async () => {
   let knex = Knex(knexConfig);
   await builder.createTables(knex, schema);
   let personCols = await knex("persons").columnInfo();
