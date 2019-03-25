@@ -106,6 +106,22 @@ const schema = {
   ]
 };
 
+const indexSchema = {
+  columns: [
+    {
+      name: "title",
+      type: "string",
+      index: true
+    },
+    { name: "author", type: "string" },
+    {
+      name: "idx",
+      type: "index",
+      columns: ["author", "title"]
+    }
+  ]
+};
+
 const knexConfig = {
   client: "sqlite3",
   connection: {
@@ -135,9 +151,81 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await builder.dropTablesIfExists(knex, schema);
+  await knex.schema.dropTableIfExists("users");
 });
 
-test("successfully drops all tables", async () => {
+const userSchema = {
+  columns: [
+    {
+      name: "test",
+      type: "string"
+    }
+  ]
+};
+
+const userColsExpected = {
+  test: {
+    type: "varchar",
+    maxLength: "255",
+    nullable: true,
+    defaultValue: null
+  }
+};
+
+test("create table with single- and multi-column indexes", async () => {
+  await builder.createTable(knex.schema, "books", indexSchema);
+  let bookCols = await knex("books").columnInfo();
+  console.log(bookCols);
+  // get a list of all indices created
+  let results = await knex("sqlite_master").where("type", "index");
+  console.log(results);
+  let expected = [
+    {
+      type: "index",
+      name: "books_title_index",
+      tbl_name: "books",
+      rootpage: 3,
+      sql: "CREATE INDEX `books_title_index` on `books` (`title`)"
+    },
+    {
+      type: "index",
+      name: "idx",
+      tbl_name: "books",
+      rootpage: 4,
+      sql: "CREATE INDEX `idx` on `books` (`author`, `title`)"
+    }
+  ];
+  expect(JSON.stringify(results)).toEqual(JSON.stringify(expected));
+});
+
+test("create a single table", async () => {
+  await builder.createTable(knex.schema, "users", userSchema);
+  let userCols = await knex("users").columnInfo();
+  expect(userCols).toEqual(userColsExpected);
+});
+
+test("create a single table with defaults", async () => {
+  const defaultUserSchema = { ...userSchema };
+  defaultUserSchema.columns[0].default = "default test";
+  const defaultUserColsExpected = { ...userColsExpected };
+  defaultUserColsExpected.test.defaultValue = "'default test'";
+  await builder.createTable(knex.schema, "users", defaultUserSchema);
+  let defaultUserCols = await knex("users").columnInfo();
+  console.log(defaultUserCols);
+  expect(defaultUserCols).toEqual(defaultUserColsExpected);
+});
+
+test("create a single table with non-nullable fields", async () => {
+  const nullableUserSchema = { ...userSchema };
+  nullableUserSchema.columns[0].nullable = false;
+  const nullableUserColsExpected = { ...userColsExpected };
+  nullableUserColsExpected.test.nullable = false;
+  await builder.createTable(knex.schema, "users", nullableUserSchema);
+  let nullableUserCols = await knex("users").columnInfo();
+  expect(nullableUserCols).toEqual(nullableUserColsExpected);
+});
+
+test("drop all tables", async () => {
   const empty = JSON.stringify({});
   await builder.createTables(knex, schema);
   expect(JSON.stringify(await knex("persons").columnInfo())).not.toEqual(empty);
@@ -151,8 +239,7 @@ test("successfully drops all tables", async () => {
   );
 });
 
-test("successfully adds columns to multiple tables", async () => {
-  let knex = Knex(knexConfig);
+test("adds columns to multiple tables", async () => {
   await builder.createTables(knex, schema);
   let personCols = await knex("persons").columnInfo();
   let movieCols = await knex("movies").columnInfo();
