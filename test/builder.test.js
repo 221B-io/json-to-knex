@@ -83,6 +83,7 @@ const schema = {
       columns: [
         {
           name: "id",
+          type: "increments",
           primary: true
         },
         {
@@ -324,6 +325,12 @@ test("adds columns to multiple tables", async () => {
     }
   };
   let personsMovies = {
+    id: {
+      type: "integer",
+      maxLength: null,
+      nullable: false,
+      defaultValue: null
+    },
     personId: {
       type: "integer",
       maxLength: null,
