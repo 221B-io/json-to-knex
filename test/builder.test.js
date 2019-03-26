@@ -179,7 +179,6 @@ test("create table with single- and multi-column indexes", async () => {
   console.log(bookCols);
   // get a list of all indices created
   let results = await knex("sqlite_master").where("type", "index");
-  console.log(results);
   let expected = [
     {
       type: "index",
