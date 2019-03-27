@@ -48,6 +48,10 @@ const booksSchema = {
       type: "string"
     },
     {
+      name: "year",
+      type: "integer"
+    },
+    {
       name: "description",
       type: "text"
     }
@@ -65,6 +69,10 @@ const newBooksSchema = {
     {
       name: "title",
       type: "string"
+    },
+    {
+      name: "year",
+      type: "date"
     },
     {
       name: "author",
