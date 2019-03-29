@@ -23,6 +23,7 @@ async function go() {
     path.join(base, "schema.schema.json")
   );
   const ajv = new Ajv({ loadSchema });
+  require("ajv-merge-patch")(ajv); // add merge and patch compatibility
 
   ajv.compileAsync(schemaSchema).then(validate => {
     const valid = validate({
@@ -31,9 +32,32 @@ async function go() {
           name: "users",
           columns: [
             {
+              name: "age",
+              type: "integer",
+              unsigned: false
+            },
+            {
               name: "firstName",
-              type: "float",
-              scale: "something"
+              type: "string"
+            },
+            {
+              name: "bio",
+              type: "text",
+              default: "This bio is currently empty."
+            },
+            {
+              name: "age",
+              type: "integer"
+            },
+            {
+              name: "invalid",
+              type: "integer"
+              // , unrecognizedField: 5 // will invalidate
+            },
+            {
+              name: "friendId",
+              type: "integer",
+              unsigned: true
             }
           ]
         }
@@ -41,6 +65,7 @@ async function go() {
     });
     if (!valid) {
       console.log("Error!");
+      console.log(validate.errors);
     } else {
       console.log("Valid!");
     }

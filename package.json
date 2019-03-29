@@ -14,6 +14,8 @@
   "license": "MIT",
   "dependencies": {
     "ajv": "^6.5.4",
+    "ajv-merge-patch": "^4.1.0",
+    "fse": "^4.0.1",
     "json-diff": "^0.5.4",
     "knex": "^0.15.2",
     "lodash": "^4.17.11"
