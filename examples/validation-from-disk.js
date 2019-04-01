@@ -50,7 +50,7 @@ async function go() {
               type: "integer"
             },
             {
-              name: "invalid",
+              name: "mightBeValid",
               type: "integer"
               // , unrecognizedField: 5 // will invalidate
             },
