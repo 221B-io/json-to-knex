@@ -36,6 +36,7 @@ afterEach(async () => {
 });
 
 const booksSchema = {
+  name: "books",
   columns: [
     {
       name: "id",
@@ -59,6 +60,7 @@ const booksSchema = {
 };
 
 const newBooksSchema = {
+  name: "books",
   columns: [
     {
       name: "id",

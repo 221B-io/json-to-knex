@@ -141,7 +141,106 @@ module.exports = {
             "CREATE UNIQUE INDEX persons_pkey ON public.persons USING btree (id)"
         }
       ],
-      columns: {}
+      columns: {
+        books: {
+          id: {
+            type: "integer",
+            maxLength: null,
+            nullable: false,
+            defaultValue: "nextval('books_id_seq'::regclass)"
+          },
+          title: {
+            type: "character varying",
+            maxLength: 255,
+            nullable: false,
+            defaultValue: null
+          },
+          author: {
+            type: "character varying",
+            maxLength: 255,
+            nullable: true,
+            defaultValue: null
+          },
+          yearPublished: {
+            type: "integer",
+            maxLength: null,
+            nullable: true,
+            defaultValue: null
+          },
+          ISSN: {
+            type: "character varying",
+            maxLength: 255,
+            nullable: true,
+            defaultValue: null
+          },
+          personId: {
+            type: "integer",
+            maxLength: null,
+            nullable: true,
+            defaultValue: null
+          }
+        },
+        persons: {
+          id: {
+            type: "integer",
+            maxLength: null,
+            nullable: false,
+            defaultValue: "nextval('persons_id_seq'::regclass)"
+          },
+          firstName: {
+            type: "character varying",
+            maxLength: 255,
+            nullable: true,
+            defaultValue: null
+          },
+          lastName: {
+            type: "character varying",
+            maxLength: 255,
+            nullable: true,
+            defaultValue: null
+          }
+        },
+        libraries: {
+          id: {
+            type: "integer",
+            maxLength: null,
+            nullable: false,
+            defaultValue: "nextval('libraries_id_seq'::regclass)"
+          },
+          name: {
+            type: "character varying",
+            maxLength: 255,
+            nullable: true,
+            defaultValue: null
+          },
+          locationLatitude: {
+            type: "real",
+            maxLength: null,
+            nullable: true,
+            defaultValue: null
+          },
+          locationLongitude: {
+            type: "real",
+            maxLength: null,
+            nullable: true,
+            defaultValue: null
+          }
+        },
+        booksLibraries: {
+          bookId: {
+            type: "integer",
+            maxLength: null,
+            nullable: true,
+            defaultValue: null
+          },
+          libraryId: {
+            type: "integer",
+            maxLength: null,
+            nullable: true,
+            defaultValue: null
+          }
+        }
+      }
     }
   }
 };

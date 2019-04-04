@@ -51,6 +51,7 @@ afterEach(async () => {
 });
 
 const oldBookSchema = {
+  name: "books",
   columns: [
     {
       name: "id",
@@ -68,6 +69,7 @@ const oldBookSchema = {
 };
 
 const bookSchema = {
+  name: "books",
   columns: [
     {
       name: "id",
@@ -103,20 +105,25 @@ let bookColsExpected = {
     defaultValue: null
   }
 };
-test("should create multiple tables", async () => {
+test("should properly create multiple tables", async () => {
   await builder.createTables(knex, booksExample);
-  let bookCols = await knex("books").columnInfo();
-  console.log(str(bookCols));
-  // expect(JSON.stringify(bookCols, null, 2)).toEqual(
-  //   JSON.stringify(bookColsExpected, null, 2)
-  // );
+  let booksCols = str(await knex("books").columnInfo());
+  let personsCols = str(await knex("persons").columnInfo());
+  let librariesCols = str(await knex("libraries").columnInfo());
+  let booksLibrariesCols = str(await knex("booksLibraries").columnInfo());
+  console.log(booksLibrariesCols);
+  expect(booksCols).toEqual(str(booksExpected.postgres.columns.books));
+  expect(personsCols).toEqual(str(booksExpected.postgres.columns.persons));
+  expect(librariesCols).toEqual(str(booksExpected.postgres.columns.libraries));
+  expect(booksLibrariesCols).toEqual(
+    str(booksExpected.postgres.columns.booksLibraries)
+  );
   await builder.dropTablesIfExists(knex, booksExample);
-  expect(true);
 });
 
 test("should migrate between two kinds of tables", async () => {
   await builder.createTable(knex.schema, "books", oldBookSchema);
-  await migrator.updateColumns(knex, "books", oldBookSchema, bookSchema);
+  await migrator.updateTable(knex, "books", oldBookSchema, bookSchema);
   let bookCols = await knex("books").columnInfo();
   expect(JSON.stringify(bookCols, null, 2)).toEqual(
     JSON.stringify(bookColsExpected, null, 2)
@@ -136,4 +143,3 @@ test("should create two indices, one single-col and one multi-col.", async () =>
 // test non-nullable fields
 // test drop all tables
 // test standard createTables method
-//
