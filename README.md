@@ -1,5 +1,14 @@
 # JSON to Knex
 
+
+```bash
+npm install json-to-knex
+j2k init  # creates json-migrations folder, .jtkconfig file
+# write your schema
+j2k migrate
+# generates your tables for you!
+```
+
 ## What it does
 
 JSON to Knex dynamically creates tables by parsing a JSON structure into a series of chained knexjs functions using the input you specify.
