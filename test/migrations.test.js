@@ -3,7 +3,7 @@ const _ = require("lodash");
 const Knex = require("knex");
 const fs = require("fs");
 const migrator = require("../lib/migrations");
-
+const { str } = require("./utils");
 const knexConfig = {
   client: "sqlite3",
   connection: {
@@ -169,21 +169,21 @@ const newDbSchema = {
 
 test("should successfully create table, then add column to table", async () => {
   await builder.createTable(knex.schema, "books", booksSchema);
-  console.log(JSON.stringify(await knex("books").columnInfo(), null, 2));
+  console.log(str(await knex("books").columnInfo()));
   await migrator.updateTable(knex, "books", booksSchema, newBooksSchema);
-  console.log(JSON.stringify(await knex("books").columnInfo(), null, 2));
+  console.log(str(await knex("books").columnInfo()));
 });
 
 test("should successfully create schema, then update schema", async () => {
   await builder.createTables(knex, oldDbSchema);
   console.log("PRE-MIGRATION");
-  console.log(JSON.stringify(await knex("books").columnInfo(), null, 2));
-  console.log(JSON.stringify(await knex("libraries").columnInfo(), null, 2));
-  console.log(JSON.stringify(await knex("persons").columnInfo(), null, 2));
+  console.log(str(await knex("books").columnInfo()));
+  console.log(str(await knex("libraries").columnInfo()));
+  console.log(str(await knex("persons").columnInfo()));
 
   await migrator.updateSchema(knex, oldDbSchema, newDbSchema);
   console.log("POST-MIGRATION");
-  console.log(JSON.stringify(await knex("books").columnInfo(), null, 2));
-  console.log(JSON.stringify(await knex("libraries").columnInfo(), null, 2));
-  console.log(JSON.stringify(await knex("persons").columnInfo(), null, 2));
+  console.log(str(await knex("books").columnInfo()));
+  console.log(str(await knex("libraries").columnInfo()));
+  console.log(str(await knex("persons").columnInfo()));
 });
