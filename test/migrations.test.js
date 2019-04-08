@@ -29,10 +29,14 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await knex.schema.dropTableIfExists("books");
+  await knex.schema.dropTableIfExists("libraries");
+  await knex.schema.dropTableIfExists("persons");
 });
 
 afterEach(async () => {
   await knex.schema.dropTableIfExists("books");
+  await knex.schema.dropTableIfExists("libraries");
+  await knex.schema.dropTableIfExists("persons");
 });
 
 const booksSchema = {
@@ -83,9 +87,103 @@ const newBooksSchema = {
   ]
 };
 
+const oldDbSchema = {
+  tables: [
+    {
+      name: "books",
+      columns: [
+        {
+          name: "id",
+          type: "increments",
+          primary: true,
+          nullable: false
+        },
+        {
+          name: "title",
+          type: "string"
+        },
+        {
+          name: "year",
+          type: "integer"
+        },
+        {
+          name: "description",
+          type: "text"
+        }
+      ]
+    },
+    {
+      name: "libraries",
+      columns: [
+        {
+          name: "id",
+          type: "increments",
+          primary: true,
+          nullable: false
+        },
+        {
+          name: "name",
+          type: "string"
+        },
+        {
+          name: "city",
+          type: "string"
+        },
+        {
+          name: "state",
+          type: "string"
+        },
+        {
+          name: "zip",
+          type: "integer"
+        }
+      ]
+    }
+  ]
+};
+
+const newDbSchema = {
+  tables: [
+    newBooksSchema,
+    {
+      name: "persons",
+      columns: [
+        {
+          name: "id",
+          type: "increments",
+          primary: true,
+          nullable: false
+        },
+        {
+          name: "firstName",
+          type: "string"
+        },
+        {
+          name: "lastName",
+          type: "string"
+        }
+      ]
+    }
+  ]
+};
+
 test("should successfully create table, then add column to table", async () => {
   await builder.createTable(knex.schema, "books", booksSchema);
   console.log(JSON.stringify(await knex("books").columnInfo(), null, 2));
-  await migrator.updateColumns(knex, "books", booksSchema, newBooksSchema);
+  await migrator.updateTable(knex, "books", booksSchema, newBooksSchema);
   console.log(JSON.stringify(await knex("books").columnInfo(), null, 2));
+});
+
+test("should successfully create schema, then update schema", async () => {
+  await builder.createTables(knex, oldDbSchema);
+  console.log("PRE-MIGRATION");
+  console.log(JSON.stringify(await knex("books").columnInfo(), null, 2));
+  console.log(JSON.stringify(await knex("libraries").columnInfo(), null, 2));
+  console.log(JSON.stringify(await knex("persons").columnInfo(), null, 2));
+
+  await migrator.updateSchema(knex, oldDbSchema, newDbSchema);
+  console.log("POST-MIGRATION");
+  console.log(JSON.stringify(await knex("books").columnInfo(), null, 2));
+  console.log(JSON.stringify(await knex("libraries").columnInfo(), null, 2));
+  console.log(JSON.stringify(await knex("persons").columnInfo(), null, 2));
 });
