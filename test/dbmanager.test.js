@@ -88,6 +88,7 @@ const schema2 = {
           name: "authorId",
           type: "integer",
           unsigned: true
+          // unAllowedKey: true
         }
         // { // TODO: add back in FK's
         //   foreign: "authorId",
