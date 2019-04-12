@@ -1,6 +1,6 @@
 const Manager = require("../lib/db-manager");
 const Knex = require("knex");
-
+const { str } = require("./utils");
 const knexPostgresConfig = {
   // just the usual knex configuration
   client: "postgres",
@@ -28,10 +28,26 @@ const knexSqliteConfig = {
   debug: true
 };
 
-const knex = Knex(knexPostgresConfig);
-const m = Manager(knex);
+let knex;
+let m;
+beforeAll(async () => {
+  knex = await Knex(knexPostgresConfig);
+  m = Manager(knex);
+});
 
 beforeEach(async () => {
+  // drop all tables
+
+  try {
+    await knex.schema.dropTableIfExists("books");
+    await knex.schema.dropTableIfExists("persons");
+  } catch (e) {
+    console.log(e);
+  }
+  console.log("Dropped all tables");
+});
+
+afterEach(async () => {
   // drop all tables
   await knex.schema.dropTableIfExists("books");
   await knex.schema.dropTableIfExists("persons");
@@ -88,14 +104,15 @@ const schema2 = {
           name: "authorId",
           type: "integer",
           unsigned: true
-          // unAllowedKey: true
+        },
+        {
+          // TODO: add back in FK's
+          name: "authorKey",
+          foreign: "authorId",
+          references: "id",
+          inTable: "persons",
+          onDelete: "CASCADE"
         }
-        // { // TODO: add back in FK's
-        //   foreign: "authorId",
-        //   references: "id",
-        //   inTable: "persons",
-        //   onDelete: "CASCADE"
-        // }
       ]
     }
   ]
@@ -138,26 +155,36 @@ async function getMigrationRows() {
   return await knex("_migrations").select("*");
 }
 
-test("should do thing", async () => {
-  await m.makeMigrationsTable();
-  await m.addMigration(schema1);
-  await m.addMigration(schema2);
-  await m.addMigration(schema3);
-  await m.rollbackCurrentMigration();
-  await m.rollbackCurrentMigration();
-  await m.applyNextMigration();
-
-  console.log(await getMigrationRows());
-  expect(true);
-});
-
-const go = async () => {
+test("should be able to add and rollback migrations", async () => {
   try {
+    await m.makeMigrationsTable();
+    await m.addMigration(schema1);
+    await m.addMigration(schema2);
+    await m.addMigration(schema3);
+    console.log(str(await knex("books").columnInfo()));
+    await m.rollbackCurrentMigration();
+    await m.rollbackCurrentMigration();
+    await m.applyNextMigration();
+
+    console.log(await getMigrationRows());
+    expect(true);
   } catch (e) {
     console.log(e);
+    expect(false);
   }
-};
+});
 
-(async () => {
-  await go();
-})();
+test("should remove un-applied migrations when a new migration is added", async () => {
+  try {
+    await m.makeMigrationsTable();
+    await m.addMigration(schema1);
+    await m.addMigration(schema2);
+    await m.rollbackCurrentMigration();
+    await m.addMigration(schema3);
+    console.log(await getMigrationRows());
+    expect(true);
+  } catch (e) {
+    console.log(e);
+    expect(false);
+  }
+});
