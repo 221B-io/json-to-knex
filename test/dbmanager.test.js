@@ -69,7 +69,7 @@ const schema1 = {
         },
         {
           name: "joined",
-          type: "datetime"
+          type: "dateTime"
         }
       ]
     }
@@ -89,7 +89,7 @@ const schema2 = {
         },
         {
           name: "joined",
-          type: "datetime"
+          type: "dateTime"
         }
       ]
     },
@@ -107,7 +107,8 @@ const schema2 = {
         },
         {
           // TODO: add back in FK's
-          name: "authorKey",
+          // name: "authorKey",
+          type: "foreign",
           foreign: "authorId",
           references: "id",
           inTable: "persons",
@@ -131,7 +132,7 @@ const schema3 = {
         },
         {
           name: "joined",
-          type: "datetime"
+          type: "dateTime"
         }
       ]
     },
@@ -143,8 +144,9 @@ const schema3 = {
           type: "string"
         },
         {
-          name: "author",
-          type: "string"
+          name: "authorId",
+          type: "integer",
+          unsigned: true
         }
       ]
     }
@@ -159,8 +161,13 @@ test("should be able to add and rollback migrations", async () => {
   try {
     await m.makeMigrationsTable();
     await m.addMigration(schema1);
+    console.log("first migration finished");
     await m.addMigration(schema2);
+    console.log("second migration finished");
+
     await m.addMigration(schema3);
+    console.log("third migration finished");
+
     console.log(str(await knex("books").columnInfo()));
     await m.rollbackCurrentMigration();
     await m.rollbackCurrentMigration();
@@ -177,9 +184,17 @@ test("should be able to add and rollback migrations", async () => {
 test("should remove un-applied migrations when a new migration is added", async () => {
   try {
     await m.makeMigrationsTable();
+    console.log("table made");
+
     await m.addMigration(schema1);
+    console.log("first migration finished");
+
     await m.addMigration(schema2);
+    console.log("second migration finished");
+
     await m.rollbackCurrentMigration();
+    console.log("second migration rolled back");
+
     await m.addMigration(schema3);
     console.log(await getMigrationRows());
     expect(true);
