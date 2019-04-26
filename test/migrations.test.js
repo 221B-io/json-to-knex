@@ -21,10 +21,10 @@ beforeAll(async () => {
 
 afterAll(async () => {
   knex.destroy();
-  fs.unlink("./test.sqlite3", err => {
-    if (err) throw err;
-    console.log("test database successfully deleted");
-  });
+  // fs.unlink("./test.sqlite3", err => {
+  //   if (err) throw err;
+  //   console.log("test database successfully deleted");
+  // });
 });
 
 beforeEach(async () => {
